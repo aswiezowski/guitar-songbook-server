@@ -2,9 +2,8 @@ var express = require('express');
 var router = express.Router();
 const fs = require('fs');
 var sanitizeFilename = require("sanitize-filename");
-
+const {SONG_DIR} = require('./constants')
 const SUPPORTED_FORMATS = ['chordpro', 'ultimateguitar', 'regular'];
-const SONG_DIR = "./public/chords/"
 
 router.get('/', function (req, res, next) {
 

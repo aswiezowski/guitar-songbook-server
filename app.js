@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cors = require('cors')
 
 var songsRouter = require('./routes/songs');
+var currentSongRouter = require('./routes/currentSong');
 var app = express();
 
 var corsOptions = {
@@ -22,5 +23,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/songs', songsRouter);
+app.use('/current-song', currentSongRouter);
 
 module.exports = app;
