@@ -57,9 +57,11 @@ router.post('/', function (req, res, next) {
 
 router.put('/', async (req, res, next) => {
     const { body } = req;
-    if (!body || !body.name || !body.oldName || !body.format || !body.chords) {
+    const songFileName = sanitizeFilename(body.name + "." + body.format);
+    const oldFileName = sanitizeFilename(body.oldFileName);
+    if (!body || !body.name || !body.oldFileName || !body.format || !body.chords) {
         res.status(400).json({
-            "error": "name, oldName, format and chords fields are required"
+            "error": "name, oldFileName, format and chords fields are required"
         });
     }
     else if (!SUPPORTED_FORMATS.includes(body.format)) {
@@ -67,21 +69,21 @@ router.put('/', async (req, res, next) => {
             "error": "format field has to have one of value: " + SUPPORTED_FORMATS
         });
     }
-    else if (!await fileExistsAndIsWritable(SONG_DIR + sanitizeFilename(body.oldName + "." + body.format))) {
-        res.status(500).json({
+    else if (!await fileExistsAndIsWritable(SONG_DIR + oldFileName)) {
+        res.status(400).json({
             error: "song doesn't exist or can't be renamed"
         });
     }
-    else if (body.name !== body.oldName && await fileExist(SONG_DIR + sanitizeFilename(body.name + "." + body.format))) {
+    else if (songFileName !== oldFileName && await fileExist(SONG_DIR + songFileName)) {
         res.status(400).json({
             error: "song already exists"
         });
     } else {
         try {
-            await fsPromises.writeFile(SONG_DIR + sanitizeFilename(body.name + "." + body.format), body.chords);
-            if (body.oldName !== body.name) {
+            await fsPromises.writeFile(SONG_DIR + songFileName, body.chords);
+            if (songFileName !== oldFileName) {
                 try {
-                    await fsPromises.rm(SONG_DIR + sanitizeFilename(body.oldName + "." + body.format));
+                    await fsPromises.rm(SONG_DIR + oldFileName);
                     res.status(200).json();
                 }
                 catch (error) {
